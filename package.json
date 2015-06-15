@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "promises-aplus-tests": "*",
+    "promises-es6-tests": "*"
+  },
+  "scripts": {
+    "test": "promises-aplus-tests test/promesse-adapter --bail"
+  },
+  "dependencies": {
+    "q": "~1.4.1"
+  }
+}
