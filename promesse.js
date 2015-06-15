@@ -46,7 +46,9 @@ Promesse.prototype._fulfill = function() {
             setImmediate((function() {
                 try {
                     var candidate = deferred.onFulfilled.call(undefined, this.value);
-                    if (candidate instanceof Promesse) {
+                    if (candidate === deferred.promise) {
+                        deferred.reject(new TypeError('Uh'));
+                    } else if (candidate instanceof Promesse) {
                         candidate.then(function (result) {
                             deferred.resolve(result);
                         }, function (reason) {
@@ -74,7 +76,9 @@ Promesse.prototype._reject = function() {
             setImmediate((function() {
                 try {
                     var candidate = deferred.onRejected.call(undefined, this.reason);
-                    if (candidate instanceof Promesse) {
+                    if (candidate === deferred.promise) {
+                        deferred.reject(new TypeError('Uh'));
+                    } else if (candidate instanceof Promesse) {
                         candidate.then(function (result) {
                             deferred.resolve(result);
                         }, function (reason) {
