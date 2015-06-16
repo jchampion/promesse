@@ -45,19 +45,8 @@ Promesse.prototype._fulfill = function() {
         } else {
             setImmediate((function() {
                 try {
-                    var candidate = deferred.onFulfilled.call(undefined, this.value);
-                    if (candidate === deferred.promise) {
-                        deferred.reject(new TypeError('Uh'));
-                    } else if (candidate instanceof Promesse) {
-                        candidate.then(function (result) {
-                            deferred.resolve(result);
-                        }, function (reason) {
-                            deferred.reject(reason);
-                        });
-                    } else {
-                        // TBC
-                        deferred.resolve(candidate);
-                    }
+                    var x = deferred.onFulfilled.call(undefined, this.value);
+                    this._resolve(deferred, x);
                 } catch (e) {
                     deferred.reject(e);
                 }
@@ -70,24 +59,12 @@ Promesse.prototype._fulfill = function() {
 Promesse.prototype._reject = function() {
     this.deferred.forEach((function(deferred) {
         if ('function' !== typeof deferred.onRejected) {
-            // TBC
             deferred.reject(this.reason);
         } else {
             setImmediate((function() {
                 try {
-                    var candidate = deferred.onRejected.call(undefined, this.reason);
-                    if (candidate === deferred.promise) {
-                        deferred.reject(new TypeError('Uh'));
-                    } else if (candidate instanceof Promesse) {
-                        candidate.then(function (result) {
-                            deferred.resolve(result);
-                        }, function (reason) {
-                            deferred.reject(reason);
-                        });
-                    } else {
-                        // TBC
-                        deferred.resolve(candidate);
-                    }
+                    var x = deferred.onRejected.call(undefined, this.reason);
+                    this._resolve(deferred, x);
                 } catch (e) {
                     deferred.reject(e);
                 }
@@ -107,6 +84,54 @@ Promesse.prototype.defer = function() {
     });
 
     return deferred;
+};
+
+/**
+ * Promise resolution procedure
+ *
+ * @param deferred
+ * @param x
+ * @private
+ */
+Promesse.prototype._resolve = function(deferred, x) {
+    if (x === deferred.promise) {
+        // 2.3.1
+        deferred.reject(new TypeError('Uh'));
+    } else if (x instanceof Promesse) {
+        // 2.3.2
+        x.then(function (result) {
+            // 2.3.2.2
+            deferred.resolve(result);
+        }, function (reason) {
+            // 2.3.2.3
+            deferred.reject(reason);
+        });
+    } else if ('object' === typeof x || 'function' === typeof x) {
+        // 2.3.3
+        try {
+            // 2.3.3.1
+            var then = x.then;
+            if ('function' === typeof then) {
+                // 2.3.3.3
+                then.call(x, function (y) {
+                    // 2.3.3.3.1
+                    this._resolve(deferred, y);
+                }.bind(this), function (r) {
+                    // 2.3.3.3.2
+                    deferred.promise.reject(r);
+                }.bind(this));
+            } else {
+                // 2.3.3.4
+                deferred.resolve(x);
+            }
+        } catch (e) {
+            // 2.3.3.2
+            deferred.reject(e);
+        }
+    } else {
+        // 2.3.4
+        deferred.resolve(x);
+    }
 };
 
 module.exports = Promesse;
