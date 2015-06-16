@@ -7,7 +7,23 @@ var p = new Promesse(function(resolve, reject) {
     }, 1000);
 });
 
-p.then(function(result) {
+p.then(function(value) {
+    return {
+        then: function(resolvePromise, rejectPromise) {
+            resolvePromise({
+                then: function(resolvePromise, rejectPromise) {
+                    rejectPromise(':/')
+                }
+            });
+        }
+    }
+}).then(function(value) {
+    console.log('resolution => ' + value);
+}, function(reason) {
+    console.log('rejection => ' + reason);
+});
+
+/*p.then(function(result) {
     console.log("resolved 1 : " + result);
 
     return new Promesse(function(resolve, reject) {
@@ -47,4 +63,4 @@ p.then(function(result) {
     console.log("resolved 5 : " + result);
 }, function(reason) {
     console.log("rejected 5 : " + reason);
-});
+});*/

@@ -106,7 +106,7 @@ Promesse.prototype._resolve = function(deferred, x) {
             // 2.3.2.3
             deferred.reject(reason);
         });
-    } else if ('object' === typeof x || 'function' === typeof x) {
+    } else if (null !== x && ('object' === typeof x || 'function' === typeof x)) {
         // 2.3.3
         try {
             // 2.3.3.1
@@ -118,7 +118,7 @@ Promesse.prototype._resolve = function(deferred, x) {
                     this._resolve(deferred, y);
                 }.bind(this), function (r) {
                     // 2.3.3.3.2
-                    deferred.promise.reject(r);
+                    deferred.reject(r);
                 }.bind(this));
             } else {
                 // 2.3.3.4
