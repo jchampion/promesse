@@ -10,11 +10,18 @@ var p = new Promesse(function(resolve, reject) {
 p.then(function(value) {
     return {
         then: function(resolvePromise, rejectPromise) {
+
+            var then = function(resolvePromise, rejectPromise) {
+                setTimeout(function() {
+                    resolvePromise('-_-');
+                }, 1000);
+            };
+
             resolvePromise({
-                then: function(resolvePromise, rejectPromise) {
-                    rejectPromise(':/')
-                }
+                then: then
             });
+
+            throw new Error('test');
         }
     }
 }).then(function(value) {

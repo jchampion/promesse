@@ -113,13 +113,22 @@ Promesse.prototype._resolve = function(deferred, x) {
             var then = x.then;
             if ('function' === typeof then) {
                 // 2.3.3.3
-                then.call(x, function (y) {
-                    // 2.3.3.3.1
-                    this._resolve(deferred, y);
-                }.bind(this), function (r) {
-                    // 2.3.3.3.2
-                    deferred.reject(r);
-                }.bind(this));
+                var ignore = false;
+                try {
+                    then.call(x, function (y) {
+                        // 2.3.3.3.1
+                        if (ignore) return;
+                        ignore = true;
+                        this._resolve(deferred, y);
+                    }.bind(this), function (r) {
+                        // 2.3.3.3.2
+                        if (ignore) return;
+                        ignore = true;
+                        deferred.reject(r);
+                    }.bind(this));
+                } catch (e) {
+                    if (!ignore) throw e;
+                }
             } else {
                 // 2.3.3.4
                 deferred.resolve(x);
