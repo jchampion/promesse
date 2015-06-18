@@ -8,16 +8,29 @@ var Promesse = function(p) {
     this.reason = undefined;
     this.deferred = [];
 
-    p((function(value) {
-        if ('pending' !== this.state) return;
+    var resolve = (function(value) {
         this.state = 'fulfilled';
         this.value = value;
         this._fulfill();
-    }).bind(this), (function(reason) {
-        if ('pending' !== this.state) return;
+    }).bind(this);
+
+    var reject = (function(reason) {
         this.state = 'rejected';
         this.reason = reason;
         this._reject();
+    }).bind(this);
+
+    var frozen = false;
+    p((function(value) {
+        if (frozen) return;
+        frozen = true;
+
+        this._resolve({promise:this, resolve: resolve, reject: reject}, value);
+    }).bind(this), (function(reason) {
+        if (frozen) return;
+        frozen = true;
+
+        reject(reason);
     }).bind(this));
 };
 
@@ -141,6 +154,10 @@ Promesse.prototype._resolve = function(deferred, x) {
         // 2.3.4
         deferred.resolve(x);
     }
+};
+
+Promesse.prototype.toString = function () {
+    return "[object Promise]";
 };
 
 module.exports = Promesse;

@@ -1,13 +1,77 @@
-var Promesse = require('../promesse');
-//var Promesse = require('q').promise;
+//var Promesse = require('../promesse');
+var Promesse = require('q').promise;
+
 
 var p = new Promesse(function(resolve, reject) {
+    resolve(new Promesse(function(resolvePromise, rejectPromise) {
+        console.log('Called then');
+        setTimeout(function() {
+            resolvePromise('aa')
+        }, 1000);
+    }));
+    resolve({
+        then: function(resolvePromise, rejectPromise) {
+            console.log('Called then');
+            setTimeout(function() {
+                resolvePromise('aa')
+            }, 1000);
+        }
+    });
+});
+
+p.then(function(value) {
+    console.log('resolution => ' + value);
+}, function(reason) {
+    console.log('rejection => ' + reason);
+});
+
+/*var p = new Promesse(function(resolve, reject) {
+    setTimeout(function() {
+        resolve({
+            then: function(resolvePromise, rejectPromise) {
+                setTimeout(function() {
+                    resolvePromise('aa')
+                }, 1000);
+            }
+        });
+        reject('aa');
+    }, 1000);
+});
+
+p.then(function(value) {
+    console.log('resolution => ' + value);
+}, function(reason) {
+    console.log('rejection => ' + reason);
+});*/
+
+/*var p = new Promesse(function(resolve, reject) {
     setTimeout(function() {
         resolve('result1')
     }, 1000);
 });
 
 p.then(function(value) {
+    return {
+        then: function(resolvePromise, rejectPromise) {
+
+            var then = new Promesse(function(resolve, reject) {
+                resolve({
+                    then: function(resolvePromise, rejectPromise) {
+                        resolvePromise('aa')
+                    }
+                });
+            });
+
+            resolvePromise(then);
+        }
+    }
+}).then(function(value) {
+    console.log('resolution => ' + value);
+}, function(reason) {
+    console.log('rejection => ' + reason);
+});*/
+
+/*p.then(function(value) {
     return {
         then: function(resolvePromise, rejectPromise) {
 
@@ -28,7 +92,7 @@ p.then(function(value) {
     console.log('resolution => ' + value);
 }, function(reason) {
     console.log('rejection => ' + reason);
-});
+});*/
 
 /*p.then(function(result) {
     console.log("resolved 1 : " + result);
