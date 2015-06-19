@@ -4,9 +4,11 @@
     "promises-es6-tests": "*"
   },
   "scripts": {
-    "test": "promises-aplus-tests test/promesse-adapter --bail"
+    "test": "promises-aplus-tests test/promesse-adapter --bail",
+    "lint": "jslint --nomen promesse.js"
   },
   "dependencies": {
-    "q": "~1.4.1"
+    "q": "~1.4.1",
+    "jslint": "~0.9.0"
   }
 }
